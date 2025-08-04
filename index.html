@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Playlist Saya</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .search {
+      display: flex;
+      margin-bottom: 15px;
+    }
+    .search input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px 0 0 6px;
+    }
+    .search button {
+      padding: 8px 16px;
+      border: none;
+      background: #ff7b7b;
+      color: white;
+      border-radius: 0 6px 6px 0;
+      cursor: pointer;
+    }
+    .song-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .song-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: #fafafa;
+      cursor: pointer;
+    }
+    .song-item:hover {
+      background: #f0f0f0;
+    }
+    .play-btn {
+      width: 0; 
+      height: 0; 
+      border-left: 12px solid yellow;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+    }
+    audio {
+      width: 100%;
+      margin-top: 15px;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .controls button {
+      padding: 8px 12px;
+      border: none;
+      background: #ff7b7b;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Playlist Saya</h2>
+    <div class="search">
+      <input type="text" id="searchInput" placeholder="Search song title..." oninput="searchSong()">
+      <button onclick="searchSong()">Search</button>
+    </div>
+    <ul id="playlist" class="song-list"></ul>
+    <audio id="audioPlayer" controls></audio>
+    <div class="controls">
+      <button onclick="prevSong()">Previous</button>
+      <button onclick="nextSong()">Next</button>
+    </div>
+  </div>
+
+  <script>
+    const songs = [
+      { title: "Hindia Evaluasi", file: "Hindia.mp3" },
+      { title: "Feast - Nina (Lirik)", file: "Feast - Nina (Lirik).mp3" },
+      { title: "Hal - L (Lirik Lagu Lyrics)", file: "Hal - L (Lirik Lagu Lyrics).mp3" },
+      { title: "Nadhif Basalamah - Bergema Sampai Selamanya (Lyrics)", file: "Nadhif Basalamah - Bergema Sampai Selamanya (Lyrics).mp3" },
+      { title: "Tarot - .Feast Lirik Lagu", file: "Tarot - .Feast Lirik Lagu.mp3" },
+      { title: "Hindia - Rumah ke Rumah Lirik Lagu", file: "Hindia - Rumah ke Rumah Lirik Lagu.mp3" },
+      { title: "Hindia - Secukupnya Lirik Lagu", file: "Hindia - Secukupnya Lirik Lagu.mp3" },
+      { title: "Lesung Pipi - Raim Laode (Lyrics)", file: "Lesung Pipi - Raim Laode (Lyrics).mp3" },
+      { title: "Pamungkas - Monolog (Lirik Lagu)", file: "Pamungkas - Monolog (Lirik Lagu).mp3" },
+      { title: "Rio Clappy - Bunga Abadi (Lirik Lyrics)", file: "Rio Clappy - Bunga Abadi (Lirik Lyrics).mp3" },
+      { title: "The Lantis - Bunga Maaf (Lyrics)", file: "The Lantis - Bunga Maaf (Lyrics).mp3" },
+      { title: "Dewa - Risalah Hati - LIRIK LAGU", file: "Dewa - Risalah Hati - LIRIK LAGU.mp3" },
+      { title: "Dewa 19 - Kangen - ( Lirik Lagu )", file: "Dewa 19 - Kangen - ( Lirik Lagu ).mp3" },
+      { title: "Dewa 19 - Separuh Nafas (Lirik Lagu)", file: "Dewa 19 - Separuh Nafas (Lirik Lagu).mp3" },
+      { title: "GENIT - TIPE-X ( lirik video )", file: "GENIT - TIPE-X ( lirik video ).mp3" },
+      { title: "Lyla - Karena Kamu Cantik Kamu Baik Lirik Lagu", file: "Lyla - Karena Kamu Cantik Kamu Baik Lirik Lagu.mp3" },
+      { title: "Pupus - Dewa 19 (Lirik Lagu)", file: "Pupus - Dewa 19 (Lirik Lagu).mp3" },
+      { title: "Tulus - Hati-hati di jalan Lirik Lagu Indonesia", file: "Tulus - Hati-hati di jalan Lirik Lagu Indonesia.mp3" },
+      { title: "Batas Senja - Nanti Kita Seperti Ini (Lirik)", file: "Batas Senja - Nanti Kita Seperti Ini (Lirik).mp3" },
+      { title: "For Revenge - Jakarta Hari Ini Lirik Lagu", file: "For Revenge - Jakarta Hari Ini Lirik Lagu.mp3" },
+      { title: "Ghea Indrawari - Jiwa Yang Bersedih (Lirik)", file: "Ghea Indrawari - Jiwa Yang Bersedih (Lirik).mp3" },
+      { title: "Kelingan Mantan - NDX A.K.A", file: "Kelingan Mantan - NDX A.K.A.mp3" },
+      { title: "KOMANG - RAIM LAODE LYRIC OFFICIAL", file: "KOMANG - RAIM LAODE LYRIC OFFICIAL.mp3" },
+      { title: "Last Child - Duka Lirik Lagu", file: "Last Child - Duka Lirik Lagu.mp3" },
+      { title: "Nanti Kita Seperti Ini - Batas Senja (Lirik Lagu) ~ Ini gambaran kita suatu hari nanti", file: "Nanti Kita Seperti Ini - Batas Senja (Lirik Lagu) ~ Ini gambaran kita suatu hari nanti.mp3" },
+      { title: "Virgoun - Selamat (Selamat Tinggal) ft Audy Lirik Lagu", file: "Virgoun - Selamat (Selamat Tinggal) ft Audy Lirik Lagu.mp3" }
+    ];
+
+    let currentSongIndex = -1;
+
+    const playlist = document.getElementById('playlist');
+    const audioPlayer = document.getElementById('audioPlayer');
+
+    function renderSongs(filter = '') {
+      playlist.innerHTML = '';
+      songs.filter(song => song.title.toLowerCase().includes(filter.toLowerCase())).forEach((song, index) => {
+        const li = document.createElement('li');
+        li.className = 'song-item';
+
+        const span = document.createElement('span');
+        span.textContent = song.title;
+
+        const playBtn = document.createElement('div');
+        playBtn.className = 'play-btn';
+        playBtn.onclick = () => playSong(index);
+
+        li.appendChild(span);
+        li.appendChild(playBtn);
+        playlist.appendChild(li);
+      });
+    }
+
+    function playSong(index) {
+      currentSongIndex = index;
+      audioPlayer.src = songs[index].file;
+      audioPlayer.play();
+    }
+
+    function nextSong() {
+      if (currentSongIndex < songs.length - 1) {
+        playSong(currentSongIndex + 1);
+      }
+    }
+
+    function prevSong() {
+      if (currentSongIndex > 0) {
+        playSong(currentSongIndex - 1);
+      }
+    }
+
+    audioPlayer.addEventListener('ended', () => {
+      nextSong();
+    });
+
+    function searchSong() {
+      const query = document.getElementById('searchInput').value;
+      renderSongs(query);
+    }
+
+    renderSongs();
+  </script>
+</body>
+</html>
